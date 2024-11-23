@@ -250,53 +250,66 @@ red_square_active = False
 red_square_position = (0, 0)
 red_square_timer = 0
 
-def try_shoot():  # Try to shoot from random position
-	global attempt_shoot_index, red_square_active, red_square_position, red_square_timer, enemy_rect
-	global opp_x, opp_y, opp_dx, opp_dy, distance
+def try_shoot():  # Try to shoot from a random position
+    global attempt_shoot_index, red_square_active, red_square_position, red_square_timer, enemy_rect
+    global opp_x, opp_y, opp_dx, opp_dy, distance
 
-	# Check if we need to generate a new red square
-	if not red_square_active:
-		attempt_shoot_index += 1
-		if attempt_shoot_index % 10 == 1:
-			# Load the image and scale it down
-			opp_img = pygame.image.load(f"hungry_monkey_sprites/Solid_red.png")
-			smaller_opp_img = pygame.transform.scale(opp_img, (30, 20))
-				
-			# Generate a random position and activate the red square
-			opp_x = random.randint(0, SCREEN_WIDTH - 30)
-			opp_y = random.randint(0, SCREEN_HEIGHT - 20)
-			enemy_rect = pygame.Rect(opp_x, opp_y, 30, 30)
-			red_square_position = (opp_x, opp_y)
-			red_square_active = True
-			red_square_timer = 100  # Red square stays active for 100 frames
+    # Check if we need to generate a new red square
+    if not red_square_active:
+        attempt_shoot_index += 1
+        if attempt_shoot_index % 10 == 1:
+            # Load the image and scale it to larger dimensions
+            opp_img = pygame.image.load(f"hungry_monkey_sprites/Solid_red.png")
+            larger_opp_img = pygame.transform.scale(opp_img, (50, 30))  # Larger size (50x30)
 
-			# Calculate the difference in positions
-			opp_dx = monkey_x - opp_x
-			opp_dy = monkey_y - opp_y
-			distance = math.sqrt(opp_dx**2 + opp_dy**2)  # Calculate distance once
-			
-			# Print distance for debugging
-			print(f"Distance: {distance}")
-			
-	else:
-		# Calculate the new distance every frame
-		distance = math.sqrt(opp_dx**2 + opp_dy**2)  # Recalculate distance each frame
-		
-		if distance != 0:
-			# Move the red square towards the monkey at a constant speed (5 pixels per frame)
-			opp_x += opp_dx / distance * 5  # Scale the movement by distance to ensure constant speed
-			opp_y += opp_dy / distance * 5  # Same for vertical movement
-		
-		# Draw the red square if it's active
-		opp_img = pygame.image.load(f"hungry_monkey_sprites/Solid_red.png")
-		smaller_opp_img = pygame.transform.scale(opp_img, (30, 20))
-		red_square_position = (opp_x, opp_y)
-		screen.blit(smaller_opp_img, red_square_position)
+            # Generate a random position and activate the red square
+            opp_x = random.randint(0, SCREEN_WIDTH - 50)  # Ensure it fits within the screen
+            opp_y = random.randint(0, SCREEN_HEIGHT - 30)
+            enemy_rect = pygame.Rect(opp_x, opp_y, 50, 30)
+            red_square_position = (opp_x, opp_y)
+            red_square_active = True
+            red_square_timer = 100  # Red square stays active for 100 frames
 
-		# Decrement the timer and deactivate the square if time runs out
-		red_square_timer -= 1
-		if red_square_timer <= 0:
-			red_square_active = False
+            # Calculate the difference in positions
+            opp_dx = monkey_x - opp_x
+            opp_dy = monkey_y - opp_y
+            distance = math.sqrt(opp_dx**2 + opp_dy**2)  # Calculate distance once
+    else:
+        # Move the red square towards the monkey at a constant speed
+        if distance != 0:
+            speed = 10  # Adjust speed as needed
+            opp_x += opp_dx / distance * speed
+            opp_y += opp_dy / distance * speed
+
+        # Draw the larger red square (bullet)
+        opp_img = pygame.image.load(f"hungry_monkey_sprites/Solid_red.png")
+        larger_opp_img = pygame.transform.scale(opp_img, (50, 30))  # Larger size
+        red_square_position = (opp_x, opp_y)
+        screen.blit(larger_opp_img, red_square_position)
+
+        # Decrement the timer and deactivate the square if time runs out
+        red_square_timer -= 1
+        if red_square_timer <= 0:
+            red_square_active = False
+
+
+def bullet_check():
+    # Larger bullet dimensions
+    bullet_width, bullet_height = 50, 30  # Bigger size
+    bullet = pygame.Rect(opp_x, opp_y, bullet_width, bullet_height)
+
+    # Check collision between the monkey and the bullet
+    if monkey.colliderect(bullet):
+        game_over_display()
+
+def bullet_check():
+    # Larger and faster bullet
+    bullet_width, bullet_height = 20, 10  # Increased size
+    bullet = pygame.Rect(opp_x, opp_y, bullet_width, bullet_height)
+
+    # Check collision between the monkey and the bullet
+    if monkey.colliderect(bullet):
+        game_over_display()
 
 def bullet_check():
 	bullet = pygame.Rect(opp_x, opp_y, 14, 7)
