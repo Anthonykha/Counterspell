@@ -88,7 +88,7 @@ def draw_setting():
 def update_monkey():
 	"""Control monkey's movement and image, and detect collisions with platforms and banana"""
 	#Globals allow us to edit variable that exist outside of this function
-	global monkey_x, monkey_y, velocity_y, monkey, monkey_img, platform_list,score, attempt_shoot_index, opp_x, opp_y, opp_dx, opp_dy, distance 
+	global monkey_x, monkey_y, velocity_y, monkey, monkey_img, platform_list,score, attempt_shoot_index, opp_x, opp_y, opp_dx, opp_dy, distance, bullet
 
 	#Constantly applying gravity to monkey
 	velocity_y += gravity
@@ -227,6 +227,7 @@ def game_loop():
 		update_monkey() #Let's allow our monkey to move and collide with things
 		advance_timer() #Progress the game timer and check if it's run out
 		try_shoot()
+		bullet_check()
 
 		# Now that we've made our changes to the frame, let's update the screen to reflect those changes:
 		pygame.display.update()
@@ -285,6 +286,10 @@ def try_shoot():  # Try to shoot from random position
 		if red_square_timer <= 0:
 			red_square_active = False
 
+def bullet_check():
+	bullet = pygame.Rect(opp_x, opp_y, 14, 7)
+	if monkey.colliderect(bullet):
+		game_over_display()
 
 
 
