@@ -251,7 +251,7 @@ red_square_position = (0, 0)
 red_square_timer = 0
 
 def try_shoot():  # Try to shoot from random position
-	global attempt_shoot_index, red_square_active, red_square_position, red_square_timer
+	global attempt_shoot_index, red_square_active, red_square_position, red_square_timer, enemy_rect
 	global opp_x, opp_y, opp_dx, opp_dy, distance
 
 	# Check if we need to generate a new red square
@@ -265,6 +265,7 @@ def try_shoot():  # Try to shoot from random position
 			# Generate a random position and activate the red square
 			opp_x = random.randint(0, SCREEN_WIDTH - 30)
 			opp_y = random.randint(0, SCREEN_HEIGHT - 20)
+			enemy_rect = pygame.Rect(opp_x, opp_y, 30, 30)
 			red_square_position = (opp_x, opp_y)
 			red_square_active = True
 			red_square_timer = 100  # Red square stays active for 100 frames
@@ -273,6 +274,7 @@ def try_shoot():  # Try to shoot from random position
 			opp_dx = monkey_x - opp_x
 			opp_dy = monkey_y - opp_y
 			distance = math.sqrt(opp_dx**2 + opp_dy**2)  # Calculate distance once
+			
 			# Print distance for debugging
 			print(f"Distance: {distance}")
 			
