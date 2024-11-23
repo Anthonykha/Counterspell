@@ -2,6 +2,7 @@
 import pygame
 import sys
 import random
+import math
 
 # Initializing pygame
 pygame.init()
@@ -37,10 +38,15 @@ monkey_y = SCREEN_HEIGHT - 100
 gravity = 1
 velocity_y = 0
 monkey_size = 50
-jump_power = -17
+jump_power = -14
 monkey = pygame.Rect(monkey_x, monkey_y, monkey_size, monkey_size)
 is_jumping = False
 monkey_img = pygame.image.load(f"hungry_monkey_sprites/2monkey_f1.png")
+opp_x=0
+opp_y=0
+opp_dx=0
+opp_dy=0
+distance = 0
 
 frame = 0
 frames_left = 1000 #How many frames are left before game over
@@ -50,6 +56,8 @@ top_score = 0
 #The banana will be our player's goal
 banana_x, banana_y = int(SCREEN_WIDTH / 2), 50
 banana = pygame.Rect(banana_x,banana_y, 50, 50)
+
+attempt_shoot_index = 0
 
 #Some RGB values we might want to use
 DARK_GREEN = (0, 150, 0)
@@ -80,7 +88,7 @@ def draw_setting():
 def update_monkey():
 	"""Control monkey's movement and image, and detect collisions with platforms and banana"""
 	#Globals allow us to edit variable that exist outside of this function
-	global monkey_x, monkey_y, velocity_y, monkey, monkey_img, platform_list,score
+	global monkey_x, monkey_y, velocity_y, monkey, monkey_img, platform_list,score, attempt_shoot_index, opp_x, opp_y, opp_dx, opp_dy, distance 
 
 	#Constantly applying gravity to monkey
 	velocity_y += gravity
@@ -218,10 +226,70 @@ def game_loop():
 		draw_setting() #Drawing floor, platforms, and banana
 		update_monkey() #Let's allow our monkey to move and collide with things
 		advance_timer() #Progress the game timer and check if it's run out
+		try_shoot()
 
 		# Now that we've made our changes to the frame, let's update the screen to reflect those changes:
 		pygame.display.update()
 		clock.tick(30) #This functions helps us cap the FPS (Frames per Second)
 		frame += 1 #We use this frame variable to animate our monkey
+
+
+# Global variables to track the red square's position and status
+red_square_active = False
+red_square_position = (0, 0)
+red_square_timer = 0
+
+def try_shoot():  # Try to shoot from random position
+	global attempt_shoot_index, red_square_active, red_square_position, red_square_timer
+	global opp_x, opp_y, opp_dx, opp_dy, distance
+
+	# Check if we need to generate a new red square
+	if not red_square_active:
+		attempt_shoot_index += 1
+		if attempt_shoot_index % 10 == 1:
+			# Load the image and scale it down
+			opp_img = pygame.image.load(f"hungry_monkey_sprites/Solid_red.png")
+			smaller_opp_img = pygame.transform.scale(opp_img, (30, 20))
+				
+			# Generate a random position and activate the red square
+			opp_x = random.randint(0, SCREEN_WIDTH - 30)
+			opp_y = random.randint(0, SCREEN_HEIGHT - 20)
+			red_square_position = (opp_x, opp_y)
+			red_square_active = True
+			red_square_timer = 100  # Red square stays active for 100 frames
+
+			# Calculate the difference in positions
+			opp_dx = monkey_x - opp_x
+			opp_dy = monkey_y - opp_y
+			distance = math.sqrt(opp_dx**2 + opp_dy**2)  # Calculate distance once
+			# Print distance for debugging
+			print(f"Distance: {distance}")
+			
+	else:
+		# Calculate the new distance every frame
+		distance = math.sqrt(opp_dx**2 + opp_dy**2)  # Recalculate distance each frame
 		
+		if distance != 0:
+			# Move the red square towards the monkey at a constant speed (5 pixels per frame)
+			opp_x += opp_dx / distance * 5  # Scale the movement by distance to ensure constant speed
+			opp_y += opp_dy / distance * 5  # Same for vertical movement
+		
+		# Draw the red square if it's active
+		opp_img = pygame.image.load(f"hungry_monkey_sprites/Solid_red.png")
+		smaller_opp_img = pygame.transform.scale(opp_img, (30, 20))
+		red_square_position = (opp_x, opp_y)
+		screen.blit(smaller_opp_img, red_square_position)
+
+		# Decrement the timer and deactivate the square if time runs out
+		red_square_timer -= 1
+		if red_square_timer <= 0:
+			red_square_active = False
+
+
+
+
+
+
+
+
 game_loop()
