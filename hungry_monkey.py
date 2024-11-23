@@ -142,7 +142,7 @@ def update_monkey():
 		platform_list = []
 		monkey_img = pygame.image.load(f"hungry_monkey_sprites/5monkey_happy.png")
 		score += 1
-		frames_left += 200
+		frames_left += 50
 
 	#Draw monkey onto screen
 	screen.blit(monkey_img, (monkey_x, monkey_y))    
