@@ -47,6 +47,7 @@ opp_y=0
 opp_dx=0
 opp_dy=0
 distance = 0
+scoreT = 0
 
 frame = 0
 frames_left = 1000 #How many frames are left before game over
@@ -88,7 +89,9 @@ def draw_setting():
 def update_monkey():
 	"""Control monkey's movement and image, and detect collisions with platforms and banana"""
 	#Globals allow us to edit variable that exist outside of this function
-	global monkey_x, monkey_y, velocity_y, monkey, monkey_img, platform_list,score, attempt_shoot_index, opp_x, opp_y, opp_dx, opp_dy, distance, bullet
+	global monkey_x, monkey_y, velocity_y, monkey, monkey_img, platform_list,score, attempt_shoot_index, opp_x, opp_y, opp_dx, opp_dy, distance, bullet, scoreT
+
+	
 
 	#Constantly applying gravity to monkey
 	velocity_y += gravity
@@ -108,17 +111,18 @@ def update_monkey():
 		if monkey.colliderect(platform) and velocity_y > 0:
 			monkey_y = platform[1] - monkey_size #platform[1] stores the platform's y coordinate
 			velocity_y = 0
-			if key_pressed[pygame.K_SPACE]: #Monkey can only jump when standing on something
+			if (key_pressed[pygame.K_SPACE] or key_pressed[pygame.K_w]): #Monkey can only jump when standing on something
 				velocity_y = jump_power
 	if monkey.colliderect(floor):
 		monkey_y = floor[1] - monkey_size
 		velocity_y = 0
-		if key_pressed[pygame.K_SPACE]:
+		if (key_pressed[pygame.K_SPACE] or key_pressed[pygame.K_w]):
 			velocity_y = jump_power
 		#Generate new platforms every time the ground is touched (won't generate if there are enough platforms)
 		generate_platforms()
 
 	#Animate the monkey
+	global frame
 	sprite_frame = int((frame / 5) % 4) + 1
 	if len(platform_list) == num_platforms:  # Whenever platforms are all generated, play the animation
 		if sprite_frame == 1:
@@ -134,9 +138,11 @@ def update_monkey():
 		monkey_img = pygame.image.load(f"hungry_monkey_sprites/6monkey_jump_sprite.png")
 	# Detect banana collision
 	if monkey.colliderect(banana) and len(platform_list) == num_platforms:
+		global top_score, frames_left, score
 		platform_list = []
 		monkey_img = pygame.image.load(f"hungry_monkey_sprites/5monkey_happy.png")
 		score += 1
+		frames_left += 200
 
 	#Draw monkey onto screen
 	screen.blit(monkey_img, (monkey_x, monkey_y))    
@@ -175,9 +181,13 @@ def game_over_display():
 
 def advance_timer():
 	"""Every frame, reduce the time left for the game and display this change"""
-	global top_score, frames_left
+	global top_score, frames_left, scoreT
 
 	frames_left -= 1
+
+	if score - scoreT ==1:
+		frames_left += 100
+		scoreT = score
 	timer_txt = font.render(f"Time left: {frames_left}", True, (255, 255, 255))
 	screen.blit(timer_txt, (10, 60))
 
